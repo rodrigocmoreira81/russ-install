@@ -1,0 +1,177 @@
+# Runbook — quando quebra
+
+> **Claude:** vá direto ao sintoma. Não leia o arquivo inteiro.
+> Ordem sempre: **ler o log antes de mexer.** Metade dos problemas se resolve lendo a
+> mensagem de erro de verdade em vez de adivinhar.
+
+**Os três comandos de primeiro diagnóstico:**
+
+```bash
+export XDG_RUNTIME_DIR=/run/user/0
+systemctl --user status hermes-gateway.service    # está no ar?
+journalctl --user -u hermes-gateway -n 50         # o que disse antes de morrer?
+hermes doctor                                      # o que está torto?
+```
+
+---
+
+## SSH não conecta
+
+| Sintoma | Causa provável | O que fazer |
+|---|---|---|
+| `Permission denied (publickey)` | Chave errada ou não instalada | `ssh -v meu-agente` e veja qual chave ele tenta. Confira o `IdentityFile` no `~/.ssh/config`. |
+| `Connection refused` | VPS desligada ou ainda bootando | Painel do provedor: a máquina está ligada? Espere 60s após boot. |
+| `Connection timed out` | IP errado ou firewall | Confirme o IP no painel. Teste `ping`. |
+| `Host key verification failed` | VPS reinstalada, identidade mudou | `ssh-keygen -R <IP>` e conecte de novo, aceitando a nova. |
+| Pede senha depois de ter desligado senha | Chave não chegou ao servidor | Use o **console web do provedor** para entrar e conferir `~/.ssh/authorized_keys`. |
+
+> Se travar de vez: todo provedor tem console de emergência no painel, que funciona sem SSH.
+> **Ninguém fica trancado para fora da própria VPS.** Diga isso — tira o pânico.
+
+---
+
+## Gateway não sobe / morre sozinho
+
+**Comando não encontrado:**
+```bash
+systemctl status hermes-gateway          # "could not be found"
+```
+→ Faltou o escopo de usuário. É `systemctl --user`, com `XDG_RUNTIME_DIR=/run/user/0`.
+Não é que não esteja instalado.
+
+**Não volta depois de reboot:**
+```bash
+loginctl show-user root | grep Linger     # tem que dizer Linger=yes
+loginctl enable-linger root
+```
+→ Causa nº 1 de "funcionava e parou". Ver Fase 2, Passo 4.
+
+**Fica em `failed` depois de um `stop`:**
+```bash
+systemctl --user reset-failed hermes-gateway.service
+systemctl --user start hermes-gateway.service
+```
+→ Normal: a política de restart marca como falha um SIGTERM. Precisa do `reset-failed`
+**antes** do `start`, senão o start é ignorado.
+
+**Sobe e morre alguns segundos depois:**
+Não confie em amostrar uma vez — observe por ~90 segundos:
+```bash
+journalctl --user -u hermes-gateway -f
+```
+→ Quase sempre é config quebrada ou credencial expirada. O log diz. Leia até o fim.
+
+---
+
+## Agente não responde (mas o serviço está no ar)
+
+| Sintoma | Causa | Solução |
+|---|---|---|
+| Erro de autenticação nos logs | Chave expirada/revogada | `hermes auth status`; gere nova chave no painel do provedor |
+| `rate limit` / `quota exceeded` | Estourou cota | Espere, ou troque de modelo; configure `hermes fallback` |
+| `NoneType is not iterable` | Bug conhecido de SDK do provedor | Anote a versão, veja issues do Hermes; `hermes update` costuma resolver |
+| Responde vazio ou trava | Contexto estourado | `/new` no Telegram; se resolver, a memória está inchada (ver abaixo) |
+| Sem erro, sem resposta | Modelo não configurado | `hermes model` e confirme |
+
+Teste isolando o canal — se responder aqui, o problema é o Telegram, não o agente:
+```bash
+hermes -z "responda apenas OK"
+```
+
+---
+
+## Telegram não responde
+
+1. **Gateway no ar?** `hermes gateway status`
+2. **Token certo?** `hermes gateway setup` e reconfigure. Se suspeitar de vazamento:
+   `/revoke` no BotFather e gere outro.
+3. **Ela está na lista de permitidos?** Causa mais comum. O log mostra a mensagem chegando
+   e sendo recusada — repare que o silêncio é proposital.
+4. **Bot certo?** Fácil ter criado dois no BotFather e estar falando com o errado.
+5. Logs ao vivo enquanto ela manda a mensagem:
+   ```bash
+   journalctl --user -u hermes-gateway -f
+   ```
+   Se **nada** aparece no log, a mensagem não chega ao servidor: token ou bot errado.
+   Se aparece e não responde: é modelo ou permissão.
+
+---
+
+## Agente não lembra
+
+| Sintoma | Causa | Solução |
+|---|---|---|
+| Esquece tudo em sessão nova | `AGENTS.md` não manda ler a memória no startup | Revise o `AGENTS.md` (Fase 5, Passo 4) — é a causa em ~80% dos casos |
+| Lembra na conversa, esquece depois | Não está **escrevendo** | Combine o gatilho explícito ("anota isso") e registre no `AGENTS.md` |
+| Lembra coisa errada/velha | Memória desatualizada | Abra o arquivo e edite. É texto — essa é a graça |
+| Memória não chega ao GitHub | `brain-sync.sh` parado | `crontab -l`; rode o script à mão e leia o erro |
+
+```bash
+cd ~/.hermes/workspace && git log --oneline -5 && git status --short
+```
+Commit mais recente com dias de atraso = sync morto.
+
+---
+
+## Cron não roda
+
+```bash
+hermes cron list --all      # está pausado?
+hermes cron runs            # rodou e falhou, ou nem tentou?
+hermes cron status          # o agendador está vivo?
+```
+
+| Sintoma | Causa |
+|---|---|
+| Chega no horário errado | Fuso do servidor ≠ fuso dela. `timedatectl` (Fase 7, Passo 1) |
+| Nunca chega | Job pausado, ou `--deliver` com ID errado |
+| Rodou mas não entregou | Prompt retornou `[SILENT]` — pode ser o comportamento correto! |
+| Falha com erro de modelo | Mesmo diagnóstico de *"Agente não responde"* |
+
+> Antes de declarar defeito: **confirme que não é `[SILENT]` funcionando.**
+> Rotina silenciosa que quebrou parece rotina silenciosa sem novidade.
+
+---
+
+## Git / cérebro
+
+**Push rejeitado:**
+```bash
+cd ~/.hermes/workspace && git pull --rebase origin main && git push
+```
+
+**`Permission denied` no push:** a deploy key não tem escrita. GitHub → repo → Settings →
+Deploy keys → **Allow write access**. Precisa recriar a chave marcando a opção.
+
+**Conflito de rebase:** abra o arquivo, procure `<<<<<<<`, resolva, `git add`,
+`git rebase --continue`. O próprio Claude resolve em dois minutos — é para isso que ele existe.
+
+**Vazou um segredo no commit:** trate a chave como comprometida — **regenere primeiro**,
+limpe o histórico depois. A ordem importa: histórico limpo com chave viva ainda é vazamento.
+
+---
+
+## Disco ou memória cheios
+
+```bash
+df -h /            # disco
+free -h            # RAM
+du -sh ~/.hermes/* | sort -rh | head -10
+journalctl --user --vacuum-time=7d      # logs costumam ser o vilão
+```
+
+Se a RAM vive no talo, é sinal de VPS pequena demais para o número de gateways. Ver Fase 1
+(plano) ou Fase 8 (menos sub-agentes).
+
+---
+
+## Nada disso resolveu
+
+Peça ao Claude Code, com contexto de verdade:
+
+> *"Meu agente Hermes parou de responder. Conecta em `ssh meu-agente`, roda
+> `hermes doctor` e `journalctl --user -u hermes-gateway -n 100`, e me diz o que
+> está acontecendo. O runbook está em `referencia/runbook.md`."*
+
+E, se for bug de verdade: [issues do Hermes](https://github.com/NousResearch/hermes-agent/issues) —
+com a saída de `hermes dump`, que reúne o diagnóstico para suporte.

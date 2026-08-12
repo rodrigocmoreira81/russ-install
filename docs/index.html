@@ -1,0 +1,442 @@
+<title>Do Zero ao Agente</title>
+<style>
+  /* ---------- tokens: light (bare :root = complete palette) ---------- */
+  :root{
+    --paper:#F0F2F1;
+    --paper-2:#E7EBE9;
+    --ink:#171E22;
+    --muted:#5C6A6E;
+    --rule:#D3D9D7;
+    --trail:#2E6B5E;
+    --signal:#E2551B;
+    --code-bg:#E4E9E7;
+
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --mono: ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+    --col: 68ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#101416;
+      --paper-2:#161B1E;
+      --ink:#E6EAE8;
+      --muted:#94A2A4;
+      --rule:#252D30;
+      --trail:#57A891;
+      --signal:#FF6E35;
+      --code-bg:#191F22;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101416;
+    --paper-2:#161B1E;
+    --ink:#E6EAE8;
+    --muted:#94A2A4;
+    --rule:#252D30;
+    --trail:#57A891;
+    --signal:#FF6E35;
+    --code-bg:#191F22;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:18px;
+    line-height:1.62;
+    margin:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--col);margin:0 auto;padding:0 24px}
+
+  /* ---------- hero ---------- */
+  header{position:relative;overflow:hidden;border-bottom:1px solid var(--rule)}
+  #contour{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+  .hero{position:relative;padding:88px 0 62px;display:flex;flex-direction:column;gap:22px}
+  .eyebrow{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin:0;
+  }
+  h1{
+    font-family:var(--serif);font-weight:600;font-size:clamp(44px,8.5vw,72px);
+    line-height:1.02;letter-spacing:-.022em;margin:0;text-wrap:balance;
+  }
+  .lede{font-size:20.5px;color:var(--muted);margin:0;max-width:52ch;text-wrap:pretty}
+
+  /* ---------- paste box ---------- */
+  .paste{
+    margin-top:8px;border:1px solid var(--rule);background:var(--paper-2);
+    border-radius:3px;overflow:hidden;
+  }
+  .paste-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:9px 14px;border-bottom:1px solid var(--rule);
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+  .paste pre{
+    margin:0;padding:16px 14px;font-family:var(--mono);font-size:13.5px;line-height:1.72;
+    white-space:pre-wrap;word-break:break-word;color:var(--ink);
+  }
+  button.copy{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    background:transparent;color:var(--trail);border:1px solid var(--trail);
+    border-radius:2px;padding:4px 10px;cursor:pointer;
+  }
+  button.copy:hover{background:var(--trail);color:var(--paper)}
+  button.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+  .facts{
+    display:flex;flex-wrap:wrap;gap:26px;margin-top:6px;padding-top:20px;
+    border-top:1px solid var(--rule);
+  }
+  .fact{display:flex;flex-direction:column;gap:2px}
+  .fact dt{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  }
+  .fact dd{margin:0;font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+
+  /* ---------- sections ---------- */
+  section{padding:60px 0;border-bottom:1px solid var(--rule)}
+  h2{
+    font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+    font-weight:600;color:var(--trail);margin:0 0 22px;
+  }
+  h3{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px;line-height:1.25}
+  p{margin:0 0 16px;text-wrap:pretty}
+  p:last-child{margin-bottom:0}
+  a{color:var(--ink);text-decoration-color:var(--trail);text-underline-offset:3px}
+  a:hover{color:var(--trail)}
+  strong{font-weight:600}
+  .note{color:var(--muted)}
+
+  .mechanisms{display:flex;flex-direction:column;gap:30px}
+  .mech{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+  .mech .mark{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--signal);
+    border:1px solid var(--signal);border-radius:2px;padding:3px 7px;white-space:nowrap;margin-top:5px;
+  }
+
+  /* ---------- trail ---------- */
+  ol.trail{list-style:none;margin:0;padding:0 0 0 34px;position:relative}
+  ol.trail::before{
+    content:"";position:absolute;left:7px;top:10px;bottom:12px;width:1px;
+    background:linear-gradient(var(--rule),var(--trail));
+  }
+  ol.trail li{position:relative;padding:0 0 26px}
+  ol.trail li::before{
+    content:"";position:absolute;left:-31px;top:9px;width:9px;height:9px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--trail);
+  }
+  ol.trail li.core::before{background:var(--trail)}
+  .ph-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .ph-n{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .ph-name{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em}
+  .ph-body{margin:3px 0 0;color:var(--muted);font-size:16.5px}
+  .gate{
+    display:block;margin-top:7px;font-family:var(--mono);font-size:12.5px;line-height:1.5;
+    color:var(--ink);border-left:2px solid var(--signal);padding:1px 0 1px 11px;
+  }
+  .gate b{color:var(--signal);font-weight:400;letter-spacing:.1em;text-transform:uppercase;font-size:10.5px;display:block}
+  .opt{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);border:1px solid var(--rule);border-radius:2px;padding:2px 6px;
+  }
+
+  /* ---------- table ---------- */
+  .tw{overflow-x:auto;margin:0 0 18px}
+  table{border-collapse:collapse;width:100%;font-size:16px}
+  th,td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:400;
+  }
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px}
+
+  /* ---------- callout ---------- */
+  .callout{
+    border:1px solid var(--rule);border-left:2px solid var(--signal);
+    background:var(--paper-2);padding:20px 22px;border-radius:2px;
+  }
+  .callout h3{font-size:19px;margin-bottom:8px}
+
+  footer{padding:44px 0 66px;color:var(--muted);font-size:15.5px}
+  footer p{margin-bottom:10px}
+  .sig{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+
+  @media (max-width:640px){
+    body{font-size:17px}
+    .hero{padding:60px 0 46px}
+    section{padding:46px 0}
+    .mech{grid-template-columns:1fr;gap:8px}
+    .mech .mark{justify-self:start;margin-top:0}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header>
+  <canvas id="contour" aria-hidden="true"></canvas>
+  <div class="wrap hero">
+    <p class="eyebrow">Manual de construção · 10 fases</p>
+    <h1>Do Zero ao Agente</h1>
+    <p class="lede">Construa seu próprio agente pessoal — rodando 24 horas, com memória que
+      não se perde. Guiado pelo Claude, mesmo que você nunca tenha aberto um terminal.</p>
+
+    <div class="paste">
+      <div class="paste-head">
+        <span>cole no seu Claude Code</span>
+        <button class="copy" id="cp">copiar</button>
+      </div>
+      <pre id="src">Leia https://raw.githubusercontent.com/rodrigocmoreira81/do-zero-ao-agente/main/BOOTSTRAP.md e me guie na construção do meu agente.</pre>
+    </div>
+
+    <dl class="facts">
+      <div class="fact"><dt>Tempo</dt><dd>3–5 h</dd></div>
+      <div class="fact"><dt>Servidor</dt><dd>R$ 40–90/mês</dd></div>
+      <div class="fact"><dt>Modelo de IA</dt><dd>R$ 0–150/mês</dd></div>
+      <div class="fact"><dt>Pré-requisito</dt><dd>nenhum</dd></div>
+    </dl>
+  </div>
+</header>
+
+<main>
+<section class="wrap">
+  <h2>O que muda</h2>
+  <p>Um chatbot responde quando você pergunta e esquece tudo depois. Um agente faz três
+    coisas a mais: ele <strong>lembra</strong>, ele <strong>faz</strong> e ele
+    <strong>age sozinho</strong> — acorda às 7h, olha sua agenda e te procura, sem você pedir.</p>
+  <p>A diferença mora na memória. Aqui ela é um repositório Git privado: arquivos de texto que
+    o agente lê ao acordar e escreve ao longo do dia. Isso te dá três coisas que nenhum chatbot
+    oferece — você <strong>enxerga</strong> o que ele sabe, <strong>corrige</strong> o que ele
+    entendeu errado, e tem <strong>histórico</strong> de tudo que mudou.</p>
+  <p class="note">É a mesma arquitetura que roda o Russ, agente pessoal em produção desde 2026:
+    agenda, e-mail, WhatsApp, newsletter, rotinas. Este material é a destilação dessa construção
+    — incluindo os erros que custaram caro.</p>
+</section>
+
+<section class="wrap">
+  <h2>Como o Claude te guia</h2>
+  <div class="mechanisms">
+    <div class="mech">
+      <span class="mark">fases</span>
+      <div>
+        <h3>Uma fase por vez, nunca o manual inteiro</h3>
+        <p class="note">O Claude carrega só a fase atual. É o que impede o erro clássico do
+          tutorial gigante colado no chat: ele começa a pular etapas e a inventar comandos
+          quando o contexto incha.</p>
+      </div>
+    </div>
+    <div class="mech">
+      <span class="mark">portões</span>
+      <div>
+        <h3>Nada avança sem prova de que funcionou</h3>
+        <p class="note">Cada fase termina num comando que passa ou falha. Se falhar, ele
+          diagnostica e conserta ali — em vez de te deixar chegar no fim com um agente
+          quebrado e nenhuma pista de onde começou a dar errado.</p>
+      </div>
+    </div>
+    <div class="mech">
+      <span class="mark">estado</span>
+      <div>
+        <h3>Você para no meio e retoma três dias depois</h3>
+        <p class="note">Ele mantém um arquivo com onde vocês pararam e o que já foi decidido.
+          Você volta, diz “continua”, e ele segue do ponto certo — sem recomeçar e sem te
+          fazer repetir o que já contou.</p>
+      </div>
+    </div>
+    <div class="mech">
+      <span class="mark">nível</span>
+      <div>
+        <h3>Você escolhe o quanto quer aprender</h3>
+        <p class="note">No modo <strong>copiloto</strong> ele explica cada passo antes de
+          executar. No <strong>piloto</strong>, resume e segue. Em qualquer um, “me explica
+          isso melhor” abre a camada de fundo da fase.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>A subida</h2>
+  <ol class="trail">
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 00</span><span class="ph-name">Bússola</span></div>
+      <p class="ph-body">O que você está construindo e para quê. Sem nenhum comando.</p>
+      <span class="gate"><b>portão</b>Você completa a frase: “meu agente vai me ajudar a ___”</span>
+    </li>
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 01</span><span class="ph-name">O terreno</span></div>
+      <p class="ph-body">Uma VPS sua, ligada 24 horas, com acesso por chave em vez de senha.</p>
+      <span class="gate"><b>portão</b>ssh meu-agente 'uptime'</span>
+    </li>
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 02</span><span class="ph-name">O corpo</span></div>
+      <p class="ph-body">Hermes instalado — e, o que importa mais, sobrevivendo a um reboot.</p>
+      <span class="gate"><b>portão</b>o serviço volta sozinho depois de reiniciar a máquina</span>
+    </li>
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 03</span><span class="ph-name">A mente alugada</span></div>
+      <p class="ph-body">Um modelo respondendo, com teto de gasto configurado no primeiro dia.</p>
+      <span class="gate"><b>portão</b>hermes -z "você está funcionando?"</span>
+    </li>
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 04</span><span class="ph-name">A voz</span></div>
+      <p class="ph-body">Ele vira um contato no seu Telegram. É aqui que a ficha cai.</p>
+      <span class="gate"><b>portão</b>você manda “oi” do celular — e um estranho não consegue</span>
+    </li>
+    <li class="core">
+      <div class="ph-head"><span class="ph-n">FASE 05</span><span class="ph-name">A memória</span></div>
+      <p class="ph-body">O segundo cérebro em GitHub. A fase mais longa e a que muda tudo.</p>
+      <span class="gate"><b>portão</b>você conta um fato hoje; em sessão nova, amanhã, ele lembra</span>
+    </li>
+    <li>
+      <div class="ph-head"><span class="ph-n">FASE 06</span><span class="ph-name">As mãos</span></div>
+      <p class="ph-body">A primeira habilidade — nascida daquela tarefa chata que você citou na Fase 0.</p>
+      <span class="gate"><b>portão</b>você ajusta a receita sozinho e vê a mudança</span>
+    </li>
+    <li>
+      <div class="ph-head"><span class="ph-n">FASE 07</span><span class="ph-name">O relógio</span></div>
+      <p class="ph-body">Ele passa a te procurar. E, quando não há nada a dizer, fica quieto.</p>
+      <span class="gate"><b>portão</b>a mensagem chega no horário, sem você pedir</span>
+    </li>
+    <li>
+      <div class="ph-head"><span class="ph-n">FASE 08</span><span class="ph-name">Os colegas</span> <span class="opt">opcional</span></div>
+      <p class="ph-body">Sub-agentes especializados. Só se você já sentiu a dor que isso resolve.</p>
+      <span class="gate"><b>portão</b>ele recusa uma tarefa fora do escopo dele</span>
+    </li>
+    <li>
+      <div class="ph-head"><span class="ph-n">FASE 09</span><span class="ph-name">Sobrevivência</span></div>
+      <p class="ph-body">Backup, custo e o que fazer quando quebra. A fase que decide se ele
+        ainda existe em seis meses.</p>
+      <span class="gate"><b>portão</b>você restaura o cérebro do zero, com as próprias mãos</span>
+    </li>
+  </ol>
+  <p class="note">As fases 0 a 5 são o núcleo — quem parar na 5 já tem um agente de verdade.
+    As 6 e 7 são o que faz ele valer o dinheiro.</p>
+</section>
+
+<section class="wrap">
+  <h2>A conta honesta</h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Por mês</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Servidor (VPS)</td><td class="num">R$ 40–90</td><td>Fixo. O piso do projeto.</td></tr>
+        <tr><td>Modelo de IA</td><td class="num">R$ 0–150</td><td>Varia com uso. Onde mora a surpresa.</td></tr>
+        <tr><td>GitHub</td><td class="num">R$ 0</td><td>Repositório privado é gratuito.</td></tr>
+        <tr><td>Telegram</td><td class="num">R$ 0</td><td>Bots são gratuitos.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Uso pessoal moderado costuma ficar entre <strong>R$ 60 e 120 por mês</strong> — mais ou
+    menos uma assinatura de streaming e meia. A pergunta certa não é se é caro, é o que isso te
+    devolve. Se economiza duas horas de trabalho chato por mês, já pagou.</p>
+  <p class="note">Valores de referência de agosto de 2026. O material te ensina a configurar
+    teto de gasto no primeiro dia, e não depois do primeiro susto.</p>
+</section>
+
+<section class="wrap">
+  <h2>Antes de decidir</h2>
+  <div class="callout">
+    <h3>Você vai dar a um programa acesso à sua vida</h3>
+    <p>Isso é o ponto de ter um agente, e é legítimo. Mas merece as mesmas perguntas que você
+      faria antes de dar a chave de casa a alguém: o que ele consegue ver, o que consegue fazer
+      sozinho, e o que acontece se errar.</p>
+    <p class="note">O material trata isso com seriedade — chaves nunca passam pelo chat, o
+      repositório é sempre privado, e a fase da memória tem uma parada obrigatória sobre
+      segurança antes de conectar e-mail ou WhatsApp. Inclusive dizendo o que ele
+      deliberadamente <em>não</em> cobre.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Para quem é</h2>
+  <p>Para quem já usa IA todo dia e começou a sentir o limite: você explica seu contexto de
+    novo toda vez, e nada do que você ensina fica. Não é preciso saber programar — é preciso
+    querer entender o que está rodando.</p>
+  <p><strong>Não é para você</strong> se o que você quer é um app pronto para instalar. Isso aqui
+    é uma construção: você vai errar, consertar e aprender no caminho. É justamente esse o
+    produto — no fim, você consegue evoluir seu agente sozinho, sem depender de ninguém.</p>
+</section>
+</main>
+
+<footer class="wrap">
+  <p>Método construído por <strong>Rodrigo Moreira</strong> a partir do Russ.
+    Roda sobre o <a href="https://hermes-agent.nousresearch.com">Hermes Agent</a>, open source,
+    da NousResearch. Inspirado no trabalho de Bruno Okamoto sobre segundo cérebro para agentes.</p>
+  <p class="sig">Hiker Ventures · 2026</p>
+</footer>
+
+<script>
+  // botão copiar
+  const btn = document.getElementById('cp');
+  btn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(document.getElementById('src').textContent.trim());
+      btn.textContent = 'copiado';
+      setTimeout(() => btn.textContent = 'copiar', 1800);
+    }catch(e){
+      btn.textContent = 'selecione e copie';
+      setTimeout(() => btn.textContent = 'copiar', 2400);
+    }
+  });
+
+  // curvas de nível do topo — campo escalar suave, traçado por marching squares
+  (function(){
+    const cv = document.getElementById('contour');
+    const ctx = cv.getContext('2d');
+    let W, H;
+
+    function field(x, y){
+      return Math.sin(x*0.9 + Math.cos(y*0.55)*1.25)
+           + Math.cos(y*0.78 - Math.sin(x*0.42)*1.05)*0.85
+           + Math.sin((x+y)*0.31)*0.55;
+    }
+
+    function draw(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = cv.clientWidth; H = cv.clientHeight;
+      if(!W || !H) return;
+      cv.width = W*dpr; cv.height = H*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,W,H);
+
+      const css = getComputedStyle(document.documentElement);
+      ctx.strokeStyle = css.getPropertyValue('--rule').trim() || '#D3D9D7';
+      ctx.lineWidth = 1;
+
+      const step = 7;                 // resolução da grade em px
+      const sc = 0.055;               // escala do campo
+      const cols = Math.ceil(W/step), rows = Math.ceil(H/step);
+
+      for(let lv = -2.2; lv <= 2.2; lv += 0.34){
+        ctx.beginPath();
+        for(let i=0;i<cols;i++){
+          for(let j=0;j<rows;j++){
+            const x0=i*step, y0=j*step, x1=x0+step, y1=y0+step;
+            const a=field(x0*sc,y0*sc)-lv, b=field(x1*sc,y0*sc)-lv,
+                  c=field(x1*sc,y1*sc)-lv, d=field(x0*sc,y1*sc)-lv;
+            // interpola o cruzamento do nível em cada aresta da célula
+            const ip=(p,q,u,v)=>{const t=p/(p-q);return [u[0]+(v[0]-u[0])*t, u[1]+(v[1]-u[1])*t];};
+            const pts=[];
+            if((a<0)!==(b<0)) pts.push(ip(a,b,[x0,y0],[x1,y0]));
+            if((b<0)!==(c<0)) pts.push(ip(b,c,[x1,y0],[x1,y1]));
+            if((c<0)!==(d<0)) pts.push(ip(c,d,[x1,y1],[x0,y1]));
+            if((d<0)!==(a<0)) pts.push(ip(d,a,[x0,y1],[x0,y0]));
+            if(pts.length===2){ ctx.moveTo(pts[0][0],pts[0][1]); ctx.lineTo(pts[1][0],pts[1][1]); }
+          }
+        }
+        ctx.stroke();
+      }
+    }
+
+    draw();
+    let t; addEventListener('resize', ()=>{clearTimeout(t); t=setTimeout(draw,160);});
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+  })();
+</script>
