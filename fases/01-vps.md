@@ -26,15 +26,20 @@ que senha: senha pode ser adivinhada por um robô tentando um milhão de vezes; 
 
 ## Passo 1 — Escolher o provedor
 
-<!-- LINK-AFILIADO: trocar a URL abaixo pelo link de afiliado.
-     Um único lugar no material inteiro — `grep -rn LINK-AFILIADO .` acha aqui. -->
-**Recomendação: [Hostinger VPS](https://www.hostinger.com.br/vps)** — interface em português,
+<!-- LINK-AFILIADO: link de afiliado do Rodrigo. Não altere a URL (mexer nela quebra
+     a atribuição). Único lugar no material — `grep -rn LINK-AFILIADO .` acha aqui. -->
+**Recomendação: [Hostinger VPS](https://www.hostinger.com/br?REFERRALCODE=EB0RODRIGQDN)** — interface em português,
 suporte em português, cobra em real e o preço é dos melhores da categoria. Para quem está
 comprando o primeiro servidor da vida, isso importa mais do que qualquer benchmark.
 
 Alternativas legítimas, se ela preferir: **DigitalOcean** e **Hetzner** (mais baratos, tudo
 em inglês, cobrança em dólar/euro) ou **Contabo** (barato, suporte irregular). Qualquer VPS
 com Ubuntu serve — nada aqui é específico da Hostinger.
+
+> **Diga isto a ela, com todas as letras:** aquele link da Hostinger é de afiliado — se ela
+> assinar por ele, o autor do material recebe uma comissão, sem custo a mais pra ela. A
+> recomendação seria a mesma sem isso, e as alternativas acima estão aqui de verdade. Ela
+> escolhe com a informação na mesa.
 
 ### Qual plano
 
