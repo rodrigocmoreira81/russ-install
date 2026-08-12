@@ -26,6 +26,8 @@ que senha: senha pode ser adivinhada por um robô tentando um milhão de vezes; 
 
 ## Passo 1 — Escolher o provedor
 
+<!-- LINK-AFILIADO: trocar a URL abaixo pelo link de afiliado.
+     Um único lugar no material inteiro — `grep -rn LINK-AFILIADO .` acha aqui. -->
 **Recomendação: [Hostinger VPS](https://www.hostinger.com.br/vps)** — interface em português,
 suporte em português, cobra em real e o preço é dos melhores da categoria. Para quem está
 comprando o primeiro servidor da vida, isso importa mais do que qualquer benchmark.

@@ -10,7 +10,7 @@ Guiado pelo Claude, do zero, mesmo que você nunca tenha aberto um terminal.
 Instale o [Claude Code](https://claude.com/claude-code), abra o terminal, e cole isto:
 
 ```
-Leia https://raw.githubusercontent.com/rodrigocmoreira81/do-zero-ao-agente/main/BOOTSTRAP.md
+Leia https://russ-install.hiker.ventures/BOOTSTRAP.md
 e me guie na construção do meu agente.
 ```
 
