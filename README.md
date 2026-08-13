@@ -94,6 +94,5 @@ susto — só o que você precisa saber para decidir com informação.
 
 Método construído por **Rodrigo Moreira** a partir do Russ.
 Roda sobre o [Hermes Agent](https://hermes-agent.nousresearch.com) (NousResearch), open source.
-Inspirado no trabalho de Bruno Okamoto sobre segundo cérebro para agentes.
 
 Quebrou algo ou está desatualizado? Abra uma issue.
