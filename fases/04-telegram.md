@@ -36,6 +36,21 @@ de banimento.
    parecer erro.
 5. O BotFather devolve um **token** parecido com `8123456789:AAH...`
 
+> **Como copiar esse token sem quebrá-lo.** Peça para ela **tocar no bloco de código** da
+> mensagem do BotFather (no celular, isso copia só o token). Duas armadilhas reais:
+> - **Nunca copie de um print/foto.** O reconhecimento de texto do celular troca caracteres
+>   parecidos — já vimos `0` virar `ø`. O gateway morre com erro de configuração e o log fala
+>   em *"lookalike Unicode glyphs"*, que ninguém entende na hora.
+> - **Nunca selecione a mensagem inteira** — vem junto o texto todo do BotFather, centenas
+>   de caracteres.
+>
+> Valide **na VPS** (Linux), nunca no terminal do Mac — o `grep` do macOS não barra
+> caracteres não-ASCII com `[A-Za-z0-9]` e aprova um token corrompido:
+> ```bash
+> ssh meu-agente "grep -m1 '^TELEGRAM' ~/.hermes/.env | cut -d= -f2- | tr -d '[:space:]' \
+>   | grep -qE '^[0-9]{8,12}:[A-Za-z0-9_-]{30,40}$' && echo 'token OK' || echo 'TOKEN CORROMPIDO'"
+> ```
+
 > **Pare aqui e diga:** esse token é a senha do bot. **Não cola no nosso chat.** Ela vai
 > digitá-lo direto no prompt do Hermes na VPS, no próximo passo. Se ela já tiver colado no
 > chat sem querer, mande revogar com `/revoke` no BotFather e gerar outro — leva 10 segundos
@@ -99,6 +114,21 @@ Mostre alguns comandos úteis que funcionam dentro do Telegram:
 | `/usage` | Quanto já gastou |
 | `/skills` | Lista as habilidades dele |
 | `/stop` | Interrompe o que ele está fazendo |
+
+### Áudio: ajuste o idioma agora
+
+O Telegram é onde chega o primeiro áudio, e a transcrição do Hermes **nasce configurada em
+inglês**. Sem isso, um áudio em português vira salada — nomes próprios viram palavras
+inglesas e ela acha que o agente é burro.
+
+```bash
+hermes config set stt.language pt
+hermes config set stt.local.model small     # o "base" erra demais; 2 vCPU aguenta o "small"
+```
+
+O primeiro áudio depois disso baixa ~460 MB de modelo, então demora. Avise, senão parece
+travamento. Palavra em inglês no meio do português ainda escapa — isso se resolve depois,
+com um glossário na skill (Fase 6).
 
 ---
 

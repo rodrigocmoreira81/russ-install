@@ -54,6 +54,15 @@ systemctl --user start hermes-gateway.service
 → Normal: a política de restart marca como falha um SIGTERM. Precisa do `reset-failed`
 **antes** do `start`, senão o start é ignorado.
 
+**`hermes gateway restart` fica pendurado:**
+Com o serviço em estado `failed`, ele tenta um encerramento gentil por **até 30 minutos**
+antes de forçar. Não espere — use o systemd direto:
+```bash
+export XDG_RUNTIME_DIR=/run/user/0
+systemctl --user reset-failed hermes-gateway.service
+systemctl --user restart hermes-gateway.service
+```
+
 **Sobe e morre alguns segundos depois:**
 Não confie em amostrar uma vez — observe por ~90 segundos:
 ```bash
@@ -97,11 +106,73 @@ hermes -z "responda apenas OK"
 
 ---
 
+## `hermes: command not found` (logo após instalar)
+
+O instalador foi interrompido perto do fim (ele baixa um Chromium de ~167 MB). Está tudo
+instalado, só falta o atalho:
+```bash
+ln -sf /usr/local/lib/hermes-agent/venv/bin/hermes /usr/local/bin/hermes
+```
+A pasta é `venv`, não `.venv`. Se nem a pasta existir, rode o instalador de novo — e antes
+disso `apt-get install -y libatomic1`, que falta na imagem do Ubuntu 24.04 e mata o
+instalador com `libatomic.so.1`.
+
+---
+
+## `invalid choice: 'usage'`
+
+`hermes usage` não existe mais. Use `hermes insights --days 7` (consumo) e `hermes status`
+(modelo e provedor ativos).
+
+---
+
+## Erro 401 / "token is invalid" logo depois de colar a chave
+
+Antes de culpar a credencial, **meça o que ficou salvo**. Colar chave longa num prompt
+através de SSH trunca em silêncio:
+```bash
+grep -m1 '^ANTHROPIC\|^OPENAI' ~/.hermes/.env | cut -d= -f2- | tr -d '[:space:]' | wc -c
+```
+Se vier bem menor que o original, é truncamento — grave direto no `.env`, sem o prompt.
+
+Token do Telegram tem armadilha parecida: copiado de print/foto, o reconhecimento de texto
+troca caracteres parecidos (`0` → `ø`) e o log fala em *"lookalike Unicode glyphs"*.
+Valide **no Linux** (o `grep` do macOS aprova não-ASCII):
+```bash
+grep -m1 '^TELEGRAM' ~/.hermes/.env | cut -d= -f2- | tr -d '[:space:]' \
+  | grep -qE '^[0-9]{8,12}:[A-Za-z0-9_-]{30,40}$' && echo OK || echo CORROMPIDO
+```
+
+---
+
+## "Quem é você?" → ele responde que é o Claude Code
+
+Ele não está lendo o cérebro. **Não é o `AGENTS.md`** — é o diretório de trabalho:
+```bash
+hermes config get terminal.cwd      # se devolver ".", é isto
+hermes config set terminal.cwd /root/.hermes/workspace
+```
+A chave é `terminal.cwd`. `terminal.working_dir` é aceita, salva e ignorada.
+
+---
+
+## Diz "anotado!" mas não aparece arquivo nem commit
+
+A memória nativa grava em `~/.hermes/memories/`, fora do repositório do cérebro. Ligue os
+dois com symlinks — ver Fase 5, Passo 7. Confira:
+```bash
+ls -l ~/.hermes/memories/*.md    # têm que ser atalhos (->), não arquivos
+```
+
+---
+
 ## Agente não lembra
 
 | Sintoma | Causa | Solução |
 |---|---|---|
-| Esquece tudo em sessão nova | `AGENTS.md` não manda ler a memória no startup | Revise o `AGENTS.md` (Fase 5, Passo 4) — é a causa em ~80% dos casos |
+| Esquece tudo em sessão nova | **Primeiro suspeito:** `terminal.cwd` em `"."` — ele nem está no cérebro | Ver *"Quem é você?"* acima. Só depois revise o `AGENTS.md` (Fase 5, Passo 4) |
+| Confirma "anotado" e nada aparece | Memória nativa fora do repo | Ver *"Diz 'anotado!'"* acima — symlinks da Fase 5, Passo 7 |
+| "Anota isso" vira lembrete agendado | Ele não carregou o `AGENTS.md` certo | Mesma causa do `terminal.cwd`; resolve junto |
 | Lembra na conversa, esquece depois | Não está **escrevendo** | Combine o gatilho explícito ("anota isso") e registre no `AGENTS.md` |
 | Lembra coisa errada/velha | Memória desatualizada | Abra o arquivo e edite. É texto — essa é a graça |
 | Memória não chega ao GitHub | `brain-sync.sh` parado | `crontab -l`; rode o script à mão e leia o erro |

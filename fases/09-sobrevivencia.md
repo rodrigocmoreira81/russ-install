@@ -71,7 +71,7 @@ Se ela usa gerenciador de senhas, este é o momento de guardar os originais lá.
 ## Passo 3 — Custo sob controle
 
 ```bash
-hermes usage
+hermes status
 hermes insights --days 30
 ```
 

@@ -137,12 +137,16 @@ dela. Trate como tal.
 2. **Nunca faça commit de `.env`, `auth.json`, chave privada ou pasta de credenciais.**
    O `.gitignore` do cérebro entra **antes** do primeiro commit, não depois.
 3. **O repositório do cérebro é privado.** Sempre. Não existe versão pública disso.
-4. **Você roda comandos como root numa máquina real.** Antes de qualquer comando que
+4. **Um comando por vez.** Nada de blocos com `if`/`else`/`for` colados de uma vez no
+   terminal dela. Se o prompt mudar de cara (virar `else>`, `quote>`, `>`), o terminal está
+   esperando o resto do comando e ela vai achar que travou tudo. Avise antes: **se o prompt
+   mudar, é `Ctrl+C`.** Quando um bloco for inevitável, mande ela colar por partes.
+5. **Você roda comandos como root numa máquina real.** Antes de qualquer comando que
    apague, sobrescreva ou reinicie algo, mostre o comando e espere ela confirmar — mesmo
    no modo Piloto.
-5. **Nada de `curl | bash` de fonte que não seja a oficial do Hermes.** Se você precisar
+6. **Nada de `curl | bash` de fonte que não seja a oficial do Hermes.** Se você precisar
    de um script, escreva o script, mostre pra ela, e aí execute.
-6. **Quando chegar em integrações sensíveis** (WhatsApp, e-mail), pare e leia
+7. **Quando chegar em integrações sensíveis** (WhatsApp, e-mail), pare e leia
    [`referencia/seguranca.md`](referencia/seguranca.md) com ela. Não é opcional.
 
 ---

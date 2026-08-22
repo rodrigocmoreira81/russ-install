@@ -140,14 +140,40 @@ apt update && apt upgrade -y
 timedatectl set-timezone America/Sao_Paulo
 
 # 3. Desligar login por senha — só chave a partir de agora
-sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-systemctl restart ssh
+cat > /etc/ssh/sshd_config.d/00-hardening.conf <<'EOF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+EOF
+sshd -t && systemctl restart ssh
 ```
 
-> **Cuidado com o passo 3:** confirme que o login por chave está funcionando **antes** de
-> desligar a senha. Ela já entrou por chave nesta sessão, então está seguro — mas não feche
-> a sessão atual até testar uma nova em outra aba. Se algo der errado, o painel da Hostinger
-> tem um console de emergência que funciona mesmo sem SSH. Diga isso a ela — tira o medo.
+> **Por que um arquivo novo e não editar o `sshd_config`?** Porque editar o principal
+> **não funciona** nessas imagens de nuvem — e falha em silêncio, que é pior. O
+> `sshd_config` faz `Include /etc/ssh/sshd_config.d/*.conf` lá em cima, e no sshd
+> **o primeiro valor lido vence**. A imagem da Hostinger traz um
+> `50-cloud-init.conf` com `PasswordAuthentication yes`, que é lido antes e ganha.
+> Por isso o arquivo se chama `00-` — para ser lido antes de todos.
+
+**Agora prove que funcionou**, em vez de acreditar:
+
+```bash
+# 1. o que o sshd REALMENTE está usando (não o que está escrito nos arquivos)
+sshd -T | grep -iE '^passwordauthentication|^kbdinteractive'
+# esperado: passwordauthentication no  /  kbdinteractiveauthentication no
+```
+
+E o teste de verdade, **da máquina dela**, forçando senha:
+
+```bash
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no root@SEU.IP
+# esperado: Permission denied (publickey).  Se PEDIR SENHA, não está blindado.
+```
+
+> **Cuidado:** confirme que o login por chave funciona **antes** de desligar a senha.
+> Ela já entrou por chave nesta sessão, então está seguro — mas não feche a sessão atual
+> até testar uma nova em outra aba. Se algo der errado, o painel da Hostinger tem console
+> de emergência que funciona sem SSH. Diga isso a ela — tira o medo.
 
 **Sobre o fuso:** muita gente deixa a VPS em UTC. Vale mencionar que isso volta a morder na
 Fase 7, quando ela for agendar rotinas — deixar em horário de Brasília agora evita conta de

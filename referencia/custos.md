@@ -86,7 +86,7 @@ curadoria aumenta o custo de **toda** interação, mesmo com o mesmo uso.
 ## Como acompanhar
 
 ```bash
-hermes usage                 # sessão atual
+hermes status                # modelo e provedor ativos agora
 hermes insights --days 30    # padrão do mês
 ```
 

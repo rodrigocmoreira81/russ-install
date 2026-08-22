@@ -186,23 +186,63 @@ crontab -l 2>/dev/null | { cat; echo "0 * * * * /root/.hermes/scripts/brain-sync
 crontab -l
 ```
 
-O script faz `pull --rebase` → `add` → `commit` → `push`. O pull vem primeiro de propósito:
-se ela editar pelo GitHub ou pelo computador, as duas pontas convergem em vez de brigar.
+O script faz `pull --rebase --autostash` → `add` → `commit` → `push`. O pull vem primeiro
+de propósito: se ela editar pelo GitHub ou pelo computador, as duas pontas convergem em vez
+de brigar. E o `--autostash` não é enfeite — sem ele o git **se recusa a rebase** sempre que
+o agente tiver acabado de escrever algo, ou seja, o sync falharia justamente quando há o que
+salvar.
 
 ---
 
-## Passo 7 — Ensinar o agente a usar a memória
+## Passo 7 — Ligar a memória nativa ao cérebro (senão nada disso funciona)
 
-Ter os arquivos não basta — o agente precisa saber que deve lê-los e escrevê-los. Isso mora
-no `AGENTS.md` (Passo 4) e vale reforçar na configuração:
+Aqui está a armadilha que faz todo o trabalho anterior parecer inútil.
+
+O Hermes tem uma ferramenta de memória embutida — é ela que age quando a pessoa diz "anota
+isso". Só que ela **não escreve no workspace**: grava em `~/.hermes/memories/`, que está
+**fora do repositório git** que vocês acabaram de montar. O resultado é cruel: o agente
+responde "anotado!", e não aparece arquivo novo, nem commit, nem nada no GitHub. Tudo
+parece quebrado, e não há erro nenhum para diagnosticar.
+
+A correção é fazer os dois lugares serem o mesmo lugar:
 
 ```bash
-hermes memory        # veja como o Hermes já trata memória
+cd ~/.hermes/workspace
+
+# 1. leve para o cérebro o que a memória nativa usa (se já existir algo)
+for f in MEMORY.md USER.md SOUL.md; do
+  [ -f ~/.hermes/memories/$f ] && [ ! -L ~/.hermes/memories/$f ] && mv ~/.hermes/memories/$f ./$f
+done
+
+# 2. deixe apontadores no lugar dos arquivos
+for f in MEMORY.md USER.md SOUL.md; do
+  [ -f ./$f ] && ln -sfn ~/.hermes/workspace/$f ~/.hermes/memories/$f
+done
+
+# 3. confira que viraram atalhos, não cópias
+ls -l ~/.hermes/memories/*.md
 ```
 
-Combine uma convenção simples e diga a ela em palavras claras, porque é o que ela vai usar
-todo dia: **quando ela disser "anota isso", o agente escreve no diário de hoje;
-quando disser "isso é importante", vai para o arquivo curado que fizer sentido.**
+Um **symlink** é um atalho: a memória nativa continua escrevendo onde sempre escreveu, mas o
+arquivo de verdade agora mora dentro do repositório — então o git enxerga, o sync leva pro
+GitHub e ela consegue ler e corrigir. Explique assim, com essas palavras.
+
+> Cuidado com uma confusão de nome: `hermes memory` **não** administra isto. Esse comando
+> serve para conectar provedores externos de memória (mem0 e afins). A memória que interessa
+> aqui são os arquivos.
+
+### Antes do portão: pergunte "quem é você?"
+
+Este teste de trinta segundos evita uma hora de diagnóstico errado. Peça a ela que pergunte
+ao agente, pelo Telegram: **"quem é você?"**
+
+- ✅ Ele responde com o **nome que ela escolheu** e o tom do `SOUL.md` → siga.
+- ❌ Ele responde algo como *"sou o Claude Code rodando como agente Hermes"*, ou diz que não
+  tem regra nenhuma → **ele não está lendo o cérebro.** Não é a memória: é o diretório de
+  trabalho. Volte à [Fase 2, Passo 2](02-hermes.md) e confira o `terminal.cwd`.
+
+Combine também a convenção que ela vai usar todo dia: **"anota isso" escreve no diário de
+hoje; "isso é importante" vai para o arquivo curado que fizer sentido.**
 
 ---
 
@@ -218,6 +258,11 @@ O teste tem que atravessar o tempo — é o único jeito de provar que a memóri
    ```
 3. **Sessão nova:** ela manda `/new` no Telegram (contexto zerado) e pergunta
    *"o que você sabe sobre meu sócio?"*
+
+> **Escolha bem as palavras do teste.** Evite perguntar por "token", "senha", "chave" ou
+> "segredo" — mesmo que ela tenha mandado anotar algo assim. Essas palavras disparam o
+> reflexo de segurança do modelo, que responde *"não guardo segredos"* e parece amnésia
+> quando é o oposto: ele está protegendo. Pergunte por um fato neutro.
 
 Passou se ele responde certo **depois do `/new`**. Aí não é o histórico da conversa
 respondendo — é a memória.

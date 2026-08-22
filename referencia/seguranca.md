@@ -60,13 +60,41 @@ Para cada integração, responda as três perguntas **antes** de configurar:
 - **Fazer:** criar e apagar eventos. Apagar é o perigoso.
 - **Recomendação:** leitura + criação, sem exclusão. Baixo risco e alto valor.
 
-### WhatsApp
+### WhatsApp — leia isto inteiro antes de ligar
+
 - **Ver:** suas conversas — incluindo as de terceiros que não escolheram isso.
 - **Fazer:** enviar em seu nome. Alto risco: mensagem errada tem custo social real.
 - **Riscos extras:** não existe API oficial gratuita. As bibliotecas não oficiais violam os
   termos e podem **banir seu número**. Use um número secundário se for seguir.
 - **Recomendação:** trate como **fonte de dados** (ler, resumir, extrair tarefa), não como
   canal de envio. É o que o Russ faz. E pense na privacidade de quem conversa com você.
+
+**Três coisas que já aconteceram com quem seguiu este material** — não são hipóteses:
+
+**1. Avisos internos do sistema vazam no chat do cliente.** Quando uma sessão do agente
+nasce a partir de uma conversa de WhatsApp, os avisos de runtime vão para **aquela**
+conversa. Um sócio recebeu, vindas do número do dono, mensagens como *"Interrupting current
+task (iteration 2/500)"* e *"Self-improvement review: Memory updated"* — em inglês, do nada.
+Quem está do outro lado descobre assim que existe um agente lendo a conversa.
+**Instrução em skill ou no `SOUL.md` não resolve isto** — o aviso vem do runtime, abaixo do
+modelo. A única defesa que funciona hoje é a mensagem **nunca criar sessão**: deixe a
+allowlist do WhatsApp **vazia**, para que mensagem de fora seja barrada antes de virar
+conversa. O agente fica sem boca — e é exatamente isso que você quer no papel de secretário.
+
+**2. "Enviado" não quer dizer "entregue".** O envio pode responder `sent` e a mensagem não
+chegar a lugar nenhum — ela fica numa fila que morre no próximo restart. Nunca confie no
+retorno: confirme com quem deveria ter recebido.
+
+**3. Número brasileiro antigo não tem o 9 no endereço interno.** Contas criadas antes do
+nono dígito mantêm o endereço com 12 dígitos (`553187534200`), e não o número que você
+disca (`5531 9 8753-4200`). Mandar para o número discável é mandar para um endereço que não
+existe — em silêncio. Isso vai atingir boa parte de uma carteira de contatos brasileira.
+**Regra:** todo contato entra com endereço **verificado**, e o primeiro envio é um canário —
+uma mensagem só, confirmada visualmente no celular de quem recebeu, antes de mandar o resto.
+
+> **Conclusão honesta:** WhatsApp é a integração mais desejada e a menos madura das que este
+> material toca. Se você não está disposto a conferir cada envio no começo, **não ligue o
+> envio** — só a leitura. Ninguém nunca se arrependeu de um agente calado.
 
 ### Arquivos e planilhas
 - **Ver/Fazer:** depende do escopo que você conceder.
@@ -111,7 +139,7 @@ Vai acontecer. O que separa susto de estrago:
 
 ## Quando desconfiar de invasão
 
-Sinais: mensagem que você não mandou, gasto fora do padrão em `hermes usage`, commit que você
+Sinais: mensagem que você não mandou, gasto fora do padrão em `hermes insights --days 7`, commit que você
 não fez, login estranho no GitHub.
 
 O que fazer, nesta ordem:

@@ -23,13 +23,35 @@ funcionário que só trabalha enquanto você olha e um que tem a chave da loja.
 
 ## Passo 1 — Instalar
 
-Na VPS (`ssh meu-agente`):
+Na VPS (`ssh meu-agente`), **primeiro uma dependência que falta na imagem do Ubuntu 24.04**:
+
+```bash
+apt-get install -y libatomic1
+```
+
+> Sem isso o instalador morre no meio com `node: error while loading shared libraries:
+> libatomic.so.1`, trava em *"Extracting to ~/.hermes/node/…"* e a conexão SSH cai junto —
+> parece que a VPS travou. Trinta segundos aqui poupam uma hora de susto.
+
+Agora o instalador:
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 source ~/.bashrc
 hermes --version
 ```
+
+> **Se o `hermes --version` disser "command not found"**, o instalador provavelmente foi
+> interrompido no fim (ele baixa um Chromium de ~167 MB e a queda ali é comum). Está tudo
+> instalado, só falta o atalho:
+> ```bash
+> ln -sf /usr/local/lib/hermes-agent/venv/bin/hermes /usr/local/bin/hermes
+> ```
+> Repare: a pasta é `venv`, não `.venv`.
+>
+> **Você (Claude) pode não conseguir executar o `curl | bash`** — o classificador de
+> segurança do Claude Code costuma barrar. Não insista: peça para **ela** colar o comando
+> no terminal. É o comportamento correto do classificador, e vale explicar por quê.
 
 O instalador traz tudo junto — Python 3.11, `uv`, Node.js, `ripgrep`, `ffmpeg`. Leva alguns
 minutos. Se ela perguntar por que demora: são umas centenas de megas de dependências, é normal.
@@ -52,6 +74,22 @@ ele pedir agora e ela ainda não decidiu, pode aceitar o padrão e trocar depois
 `hermes model`. Não trave aqui.
 
 Workspace: aceite o padrão (`~/.hermes/workspace`). É onde o cérebro vai morar na Fase 5.
+
+**Depois do wizard, fixe o diretório de trabalho — isto não é opcional:**
+
+```bash
+hermes config set terminal.cwd /root/.hermes/workspace
+hermes config get terminal.cwd     # tem que devolver o caminho, não "."
+```
+
+> **Por que isso importa tanto.** Se ficar em `"."`, o agente roda fora do workspace e
+> acaba carregando o `AGENTS.md` do **código-fonte do Hermes** em vez do cérebro dela.
+> O sintoma aparece só lá na Fase 5, disfarçado: perguntada "quem é você?", a criatura
+> responde *"sou o Claude Code rodando como agente Hermes"*, ignora o `SOUL.md` e jura
+> que não tem regra nenhuma. Parece problema de memória; é problema de diretório.
+>
+> A chave é **`terminal.cwd`**. Existe uma `terminal.working_dir` que o Hermes aceita,
+> salva — e ignora. Se você usar essa, tudo parece certo e nada funciona.
 
 ---
 

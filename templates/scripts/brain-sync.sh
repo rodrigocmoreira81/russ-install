@@ -34,7 +34,11 @@ cd "$WORKSPACE" || { log "ERRO: workspace '$WORKSPACE' não existe"; exit 1; }
 git rev-parse --git-dir >/dev/null 2>&1 || { log "ERRO: '$WORKSPACE' não é um repo git"; exit 1; }
 
 # --- 1. trazer o que mudou lá fora ------------------------------------------
-if ! timeout $GIT_TIMEOUT git pull --rebase origin "$BRANCH" >>"$LOG" 2>&1; then
+# --autostash é OBRIGATÓRIO: entre uma execução e outra o workspace quase sempre
+# tem mudança não commitada (o agente acabou de escrever no diário), e o git se
+# RECUSA a rebase com a árvore suja. Sem isto o sync só funciona por sorte de
+# timing — falha justamente quando há o que salvar.
+if ! timeout $GIT_TIMEOUT git pull --rebase --autostash origin "$BRANCH" >>"$LOG" 2>&1; then
   log "ERRO: pull/rebase falhou — pode haver CONFLITO. Resolva à mão:"
   log "      cd $WORKSPACE && git status"
   git rebase --abort 2>/dev/null   # volta ao estado anterior; não deixa o repo travado

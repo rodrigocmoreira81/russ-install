@@ -53,6 +53,19 @@ hermes model     # escolhe provedor e modelo
 Quando ele pedir a chave, ela cola **no prompt do Hermes na VPS** — nunca no seu chat.
 O Hermes guarda no `.env` dele.
 
+> **Confira o comprimento do que ficou salvo.** Colar uma chave longa dentro de um prompt
+> através de uma sessão SSH pode **truncar em silêncio** — o erro que aparece depois é
+> `HTTP 401 ... token is invalid`, e todo mundo perde horas achando que a credencial está
+> errada quando ela só chegou pela metade. Compare:
+> ```bash
+> # quantos caracteres o provedor te deu (rode na máquina dela)
+> pbpaste | tr -d '[:space:]' | wc -c        # macOS
+> # quantos caracteres chegaram na VPS
+> ssh meu-agente "grep -m1 '^ANTHROPIC' ~/.hermes/.env | cut -d= -f2- | tr -d '[:space:]' | wc -c"
+> ```
+> Os dois números têm que bater. Se não baterem, grave direto no arquivo, sem passar pelo
+> prompt — e nunca deixe a chave aparecer no seu chat nem no histórico do shell.
+
 **OpenRouter** é uma boa porta de entrada aqui: uma chave só dá acesso a modelos de vários
 fornecedores, e dá pra trocar de modelo sem abrir conta nova.
 
@@ -92,7 +105,8 @@ Faça isso **hoje**, não no primeiro susto de fatura:
 Depois, ensine o comando que mostra o consumo:
 
 ```bash
-hermes usage        # consumo da sessão
+hermes insights --days 7    # consumo dos últimos 7 dias
+hermes status               # modelo e provedor ativos agora
 hermes insights --days 7    # padrão de uso na semana
 ```
 
