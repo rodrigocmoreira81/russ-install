@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""brain-search — busca rápida no cérebro via qmd, com as travas certas (Módulo A1).
+
+Uso:  brain-search "Nome ou assunto" [--diario] [--sessoes] [-n 5]
+
+Por que existe: o MCP do qmd fica atrás de tool_search (agente quase nunca acha)
+e aceita rerank:true, que em VPS sem GPU leva 2-4 min. Aqui é sempre:
+query estruturada lex+vec (sem expansão por LLM), --no-rerank, coleções curadas.
+~10-15s por busca (uma query por coleção). Score é normalizado POR coleção.
+Resultado é pista para confirmar na fonte, não fato.
+"""
+import argparse, json, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor
+
+BASE = ["cerebro-curado", "cerebro-identidade", "cerebro-skills"]
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("termo")
+    ap.add_argument("--diario", action="store_true", help="inclui diários brutos (daily-mission etc.)")
+    ap.add_argument("--sessoes", action="store_true", help="inclui transcrições de sessões")
+    ap.add_argument("-n", type=int, default=5)
+    a = ap.parse_args()
+
+    termo = " ".join(a.termo.split()).replace('"', "")
+    cols = BASE + (["cerebro-diario"] if a.diario else []) + (["cerebro-sessoes"] if a.sessoes else [])
+
+    # qmd 2.5.3: `query` híbrido com 0 ou 2+ `-c` devolve "No results" (bug) —
+    # só funciona com exatamente uma coleção. Então: uma busca por coleção, em paralelo.
+    def one(col):
+        cmd = ["qmd", "query", f"lex: {termo}\nvec: {termo}", "--no-rerank",
+               "-n", str(a.n), "-c", col, "--format", "json"]
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=45).stdout
+        return json.loads(out[out.find("["):] if "[" in out else "[]")
+
+    res, erros = [], 0
+    with ThreadPoolExecutor(max_workers=len(cols)) as ex:
+        for fut in [ex.submit(one, c) for c in cols]:
+            try:
+                res += fut.result()
+            except Exception:
+                erros += 1
+    if erros == len(cols):
+        print("(brain-search indisponível) — siga sem o cérebro, não invente contexto")
+        return 0
+    res = sorted(res, key=lambda r: r.get("score", 0), reverse=True)[: a.n]
+    if not res:
+        print(f"(nada no cérebro sobre: {termo})")
+        return 0
+    for r in res:
+        snip = " ".join((r.get("snippet") or "").split())[:280]
+        path = (r.get("file") or "").replace("qmd://", "")
+        print(f"{r.get('score', 0):.2f}  {path}:{r.get('line', 1)}  {r.get('title') or ''} — {snip}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

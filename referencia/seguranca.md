@@ -86,8 +86,8 @@ chegar a lugar nenhum — ela fica numa fila que morre no próximo restart. Nunc
 retorno: confirme com quem deveria ter recebido.
 
 **3. Número brasileiro antigo não tem o 9 no endereço interno.** Contas criadas antes do
-nono dígito mantêm o endereço com 12 dígitos (`553187534200`), e não o número que você
-disca (`5531 9 8753-4200`). Mandar para o número discável é mandar para um endereço que não
+nono dígito mantêm o endereço com 12 dígitos (`551155550123`), e não o número que você
+disca (`5511 9 5555-0123`). Mandar para o número discável é mandar para um endereço que não
 existe — em silêncio. Isso vai atingir boa parte de uma carteira de contatos brasileira.
 **Regra:** todo contato entra com endereço **verificado**, e o primeiro envio é um canário —
 uma mensagem só, confirmada visualmente no celular de quem recebeu, antes de mandar o resto.
@@ -160,6 +160,29 @@ journalctl --user -u hermes-gateway --since "24 hours ago" | less
 ```
 
 Parar o sangramento vem antes de entender a causa. Sempre.
+
+---
+
+## Classificadores e serviços externos (Módulo A2)
+
+Qualquer serviço que recebe **trecho** de e-mail, mensagem ou memória para classificar,
+resumir ou buscar é um novo lugar onde seus dados passam, mesmo que seja "só uma nota de 0 a 1".
+
+- **Nasce desligado.** Ter a chave não pode ligar nada; ligar exige um segundo sinal explícito
+  (`private_content_authorized: true`), com data anotada.
+- **Filtro antes do fornecedor.** Teste o filtro de categorias `sealed` e de arquivos de
+  identidade (`USER.md`, `SOUL.md`) **antes** da primeira varredura. Em produção, a primeira
+  varredura mandou o `USER.md` com uma referência familiar, e a correção não desfaz o envio.
+- **Falha devolve o resultado original.** Sem fornecedor substituto automático.
+- **Texto da fonte é evidência, nunca instrução.** Uma mensagem pode tentar mandar no agente.
+
+---
+
+## Instalando para outra pessoa
+
+Se você está montando o agente de um cliente, leia [`CLIENTE.md`](../CLIENTE.md): contas no
+nome dele, segredos que você não vê, autorização escrita para cada fornecedor e um handover
+que termina com o seu acesso revogado.
 
 ---
 

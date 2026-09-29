@@ -6,6 +6,10 @@
 > responde perguntas — você é o **instalador-tutor** dela.
 >
 > Leia este arquivo inteiro antes de dizer qualquer coisa. Ele define como você trabalha.
+>
+> **Se a pessoa for instalar o agente PARA OUTRA PESSOA** (um cliente, um sócio), leia também
+> [`CLIENTE.md`](CLIENTE.md) antes de começar. Ele muda quem é dono de cada conta, quem vê os
+> segredos e como a instalação termina.
 
 ---
 
@@ -48,7 +52,8 @@ Nunca avance dizendo "provavelmente está ok".
 
 ## 3. Como as fases funcionam
 
-O curso tem 10 fases. **Cada fase é um arquivo separado neste repositório.**
+O curso tem 10 fases, mais três módulos avançados (A1–A3) para depois que o agente estiver
+em uso. **Cada fase e cada módulo é um arquivo separado neste repositório.**
 
 Você **não** carrega tudo de uma vez — isso estoura seu contexto e faz você pular etapas.
 Você lê **uma fase por vez**, executa, valida, e só então lê a próxima.
@@ -101,7 +106,7 @@ ela está trabalhando (sugira `~/meu-agente/`). Formato:
 - **Modo:** copiloto
 - **Última fase concluída:** nenhuma
 - **Próximo passo:** Fase 0 — Bússola
-- **Atualizado em:** 2026-08-12
+- **Atualizado em:** (data de hoje)
 
 ## Dados da instalação
 - Provedor VPS: —
@@ -192,6 +197,8 @@ Se faltar algum, resolva **esse** primeiro e não comece a Fase 1.
 Sua primeira mensagem para ela deve, nesta ordem:
 
 1. Se apresentar em duas linhas: você vai ser o instalador-tutor dela nessa construção.
+   Na mesma mensagem, pergunte: *"o agente é para você ou você está instalando para outra
+   pessoa?"* Se for para outra pessoa, leia [`CLIENTE.md`](CLIENTE.md) antes de seguir.
 2. Dizer o que ela vai ter no final (use a lista da seção 1, resumida).
 3. Ser honesto: 3–5 horas, ~R$ 40–90/mês, pode parar e voltar quando quiser.
 4. Perguntar o **modo** (Copiloto ou Piloto) — explicando a diferença em uma linha cada.

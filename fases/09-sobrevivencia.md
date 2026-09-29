@@ -89,6 +89,9 @@ Combine uma checagem mensal no calendário dela. Cinco minutos.
 ## Passo 4 — Atualizar sem quebrar
 
 ```bash
+hermes update --check          # tem versão nova?
+hermes update --plan           # o que vai reiniciar — não muda nada
+hermes backup -q -l pre-update # snapshot rápido: config, estado, .env, auth, cron
 hermes update
 hermes doctor
 ```
@@ -97,8 +100,13 @@ A regra, aprendida no susto: **atualizar, verificar, ter caminho de volta.** Upd
 automático sem verificação já derrubou agente em produção — o serviço reinicia, sobe, morre
 alguns segundos depois, e ninguém percebe até a rotina da manhã não chegar.
 
-Ensine o hábito mínimo: depois de todo update, `hermes doctor` **e** mandar um "oi" no
-Telegram. Trinta segundos que evitam uma semana de agente morto.
+Ensine o hábito mínimo: depois de todo update, `hermes doctor`, **esperar um minuto e meio**,
+conferir o serviço de novo, e mandar um "oi" no Telegram. A espera não é exagero: um gateway
+que sobe e morre em 10 segundos passa numa checagem feita logo depois do restart, e em
+produção isso custou 15 horas fora do ar.
+
+O `hermes backup -q` guarda `.env` e `auth.json`: é um arquivo **com segredos**. Fica na VPS,
+nunca no repo do cérebro.
 
 ---
 
@@ -154,6 +162,9 @@ e, se ela for dar uma palestra sobre isso um dia, é o slide final.
 - Uma skill nova por semana, sempre nascida de um incômodo real
 - Ler o cérebro pelo Claude Code na máquina dela, clonando o repo
 - Fase 8, se um dia doer
+- **Módulos avançados** ([`MAPA.md`](../MAPA.md)): A3 (operação blindada) para quem vai
+  depender do agente no dia a dia, A1 (busca) quando o cérebro crescer, A2 (pendências que se
+  fecham sozinhas) quando e-mail/WhatsApp estiverem ligados
 
 ---
 

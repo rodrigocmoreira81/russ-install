@@ -59,7 +59,19 @@ Detalhes honestos em [`referencia/custos.md`](referencia/custos.md).
 | 8 | Os colegas | Sub-agentes especializados *(opcional)* |
 | 9 | Sobrevivência | Backup, custo, e o que fazer quando quebra |
 
+Depois, quando você passar a depender dele, três **módulos avançados**:
+
+| # | Módulo | O que você ganha |
+|---|---|---|
+| A1 | Busca no cérebro | Um buscador local (qmd) que acha o que está escrito e o agente esqueceu |
+| A2 | Pendências que se fecham sozinhas | Memória só com o seu aval, e baixas automáticas reversíveis (Context Ledger + Jev) |
+| A3 | Operação blindada | Alerta quando ele cai, token vigiado, atualização com caminho de volta |
+
 Mapa completo com os portões de verificação: [`MAPA.md`](MAPA.md).
+
+**Vai instalar para um cliente ou outra pessoa?** Diga isso ao Claude na primeira mensagem.
+Existe um modo próprio ([`CLIENTE.md`](CLIENTE.md)): tudo no nome do dono, segredos que você
+não vê, consentimento para cada fornecedor e um handover que termina com o seu acesso revogado.
 
 ---
 
