@@ -21,6 +21,26 @@ As 6–7 são o que faz ele valer o dinheiro. A 8 é para quem pegou gosto.
 
 ---
 
+## Módulos avançados (depois da Fase 9, quando ela passar a depender do agente)
+
+| # | Módulo | Quando oferecer | Tempo | Portão |
+|---|---|---|---|---|
+| A1 | [Busca no cérebro (qmd)](modulos/A1-busca-qmd.md) | Cérebro com 100+ arquivos e o agente "esquecendo" coisa escrita | 40 min | Uma rotina real acha algo que estava num diário antigo |
+| A2 | [Pendências que se fecham sozinhas (Ledger + Jev)](modulos/A2-ledger-jev.md) | E-mail/WhatsApp ligados e o agente cobrando o que já foi feito | 2 h | Uma baixa automática aparece na fila e é desfeita |
+| A3 | [Operação blindada](modulos/A3-operacao-blindada.md) | Ela depende do agente no dia a dia. **Sempre no modo cliente.** | 60 min | Derrubar o agente dispara alerta sozinho |
+
+Ordem recomendada: **A3 → A1 → A2.** Primeiro não ficar mudo sem saber, depois achar o que
+está escrito, e só então deixar o agente concluir coisas sozinho.
+
+---
+
+## Instalando para outra pessoa?
+
+Leia [`CLIENTE.md`](CLIENTE.md) **antes da Fase 0**: quem é dono de cada conta, segredos que o
+consultor não vê, consentimento para cada fornecedor de dados e o handover.
+
+---
+
 ## Referência (consulte quando precisar, não leia inteiro)
 
 | Arquivo | Quando abrir |

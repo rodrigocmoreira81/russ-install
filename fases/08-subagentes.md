@@ -43,14 +43,18 @@ No Hermes, sub-agente é um **profile**: config, skills e memória próprias.
 
 ```bash
 hermes profile list
-hermes profile create financeiro     # ou o nome do domínio dela
+hermes profile create financeiro --description "Finanças pessoais: contas, faturas, orçamento"
 ```
+
+A `--description` não é enfeite: é por ela que o kanban decide para quem mandar uma tarefa.
+Uma frase, com o domínio e as palavras que ela usaria. `--clone` copia config, `.env`, `SOUL.md`
+e skills do principal (sem os bots) e economiza meia hora quando o sub-agente é parecido.
 
 Cada profile ganha:
 - `~/.hermes/profiles/<nome>/config.yaml` — modelo e ferramentas próprias
 - `~/.hermes/profiles/<nome>/skills/` — skills só dele
 - `~/.hermes/profiles/<nome>/SOUL.md` — identidade própria
-- `~/.hermes/agents/<nome>/workspace/` — memória de trabalho
+- `~/.hermes/profiles/<nome>/workspace/` — memória de trabalho
 
 Comandos com profile levam a flag **antes** do subcomando — pegadinha que confunde:
 
@@ -92,8 +96,18 @@ hermes --profile financeiro -z "resuma meus gastos deste mês"
 
 A assíncrona é melhor para tarefa longa: não trava o principal e deixa rastro auditável.
 
-Se ela quiser o sub-agente com canal próprio no Telegram, é outro bot (Fase 4 de novo) e
-outro serviço de gateway. Faça só se o caso 3 do Passo 1 for o motivo dela.
+Se ela quiser o sub-agente com canal próprio no Telegram, é outro bot (Fase 4 de novo). Nas
+versões atuais, **um gateway só pode servir todos os profiles**
+(`hermes gateway migrate --multiplex --dry-run` mostra o plano antes de mudar nada), em vez de
+um serviço por sub-agente. Menos RAM e menos coisa para vigiar. Faça só se o caso 3 do Passo 1
+for o motivo dela.
+
+**Slack com vários agentes: um app do Slack por agente**, desde o primeiro dia. Compartilhar um
+app entre agentes obriga a gambiarras de token, e desligar o Slack num profile já fez rotina
+reportar sucesso sem entregar nada.
+
+Horários: as rotinas do sub-agente **não** podem cair no mesmo minuto das do principal (ver
+Fase 7).
 
 ---
 

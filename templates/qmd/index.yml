@@ -1,0 +1,32 @@
+# qmd — coleções do cérebro por grau de confiança (Módulo A1).
+# Copie para ~/.config/qmd/index.yml na VPS, troque NOME_DO_AGENTE e ajuste o caminho do home
+# (o qmd não expande ~). Trocou coleção depois de indexar? Reconstrua o índice (ver módulo).
+global_context: Cérebro do NOME_DO_AGENTE — memória operacional, decisões, lições, identidade e skills.
+collections:
+  cerebro-identidade:
+    path: /root/.hermes/workspace
+    pattern: '*.md'
+    includeByDefault: true
+    context:
+      /: 'Identidade e mapas: SOUL, USER, AGENTS, MAP'
+  cerebro-curado:
+    path: /root/.hermes/workspace/memory
+    pattern: '*.md'
+    ignore:
+    - 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]*.md
+    - _tmp_*.md
+    includeByDefault: true
+    context:
+      /: 'Memória curada: decisões, lições aprendidas, projetos, pessoas'
+  cerebro-skills:
+    path: /root/.hermes/workspace/skills
+    pattern: '**/*.md'
+    includeByDefault: true
+    context:
+      /: 'Skills: como fazer cada coisa'
+  cerebro-diario:
+    path: /root/.hermes/workspace/memory
+    pattern: '20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]*.md'
+    includeByDefault: false
+    context:
+      /: 'Diários brutos, não curados — histórico, não estado atual'

@@ -89,8 +89,19 @@ hermes model            # ver e trocar o modelo padrão
 hermes fallback         # o que usar quando o principal falha
 ```
 
-Configure o **fallback** agora, não depois. Provedor cai, cota estoura, chave expira — sem
-fallback o agente simplesmente emudece e ela não sabe por quê.
+**Decida sobre o fallback agora, não depois.** Provedor cai, cota estoura, chave expira. Sem
+fallback, o agente emudece. Com fallback, ele continua respondendo com outro modelo, e aí o
+risco é o oposto: a queda do principal vira **degradação silenciosa**, talvez mais cara, e
+ninguém percebe. As duas escolhas são defensáveis. Explique o trade-off e deixe ela escolher:
+
+- **Com fallback:** configure aqui e olhe `hermes insights` toda semana para ver se ele está
+  sendo usado.
+- **Sem fallback:** o watchdog do [Módulo A3](../modulos/A3-operacao-blindada.md) passa a ser
+  obrigatório, senão ninguém fica sabendo da queda.
+
+> **Assinatura via OAuth (Caminho C)?** Anote no `ESTADO.md` quando o token vence. Em produção,
+> o token do ChatGPT/Codex durou ~10 dias e nem toda versão do Hermes renovou sozinha. O Módulo
+> A3 mostra como vigiar isso.
 
 ---
 
@@ -105,9 +116,8 @@ Faça isso **hoje**, não no primeiro susto de fatura:
 Depois, ensine o comando que mostra o consumo:
 
 ```bash
-hermes insights --days 7    # consumo dos últimos 7 dias
+hermes insights --days 7    # consumo e padrão de uso dos últimos 7 dias
 hermes status               # modelo e provedor ativos agora
-hermes insights --days 7    # padrão de uso na semana
 ```
 
 Vale combinar com ela de olhar isso na primeira semana. É a hora em que dá pra corrigir

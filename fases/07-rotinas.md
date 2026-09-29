@@ -46,7 +46,7 @@ Se estiver em UTC e ela não quiser mudar, a regra é somar 3 horas: 9h BRT = `0
 Comece pelo brief da manhã — é o que dá vontade de continuar:
 
 ```bash
-hermes cron create '0 7 * * *' \
+hermes cron create '7 7 * * *' \
   "Bom dia. Leia meu diário de hoje e de ontem na memória, veja o que ficou pendente e me mande um resumo de no máximo 6 linhas com o que importa hoje. Se não houver nada relevante, responda apenas [SILENT]." \
   --name brief-matinal \
   --deliver telegram:ID_DELA
@@ -84,11 +84,16 @@ Duas boas candidatas, ambas nascidas da resposta 2 da Fase 0:
 
 | Rotina | Quando | Para quê |
 |---|---|---|
-| Fechamento do dia | `0 21 * * *` | Perguntar o que aconteceu e gravar na memória — alimenta a Fase 5 sozinho |
-| Revisão semanal | `0 18 * * 0` | Ler a semana, promover o que virou permanente para a memória curada |
+| Fechamento do dia | `13 21 * * *` | Perguntar o que aconteceu e gravar na memória — alimenta a Fase 5 sozinho |
+| Revisão semanal | `22 18 * * 0` | Ler a semana, promover o que virou permanente para a memória curada |
 
 A revisão semanal é a mais subestimada: é ela que impede o cérebro de virar depósito e o custo
 de subir sozinho.
+
+**Fuja do minuto redondo.** Use `7 7 * * *`, `13 21 * * *` e não `0 7`/`0 21`. Parece mania, mas
+rotinas (e sub-agentes, na Fase 8) que disparam **no mesmo minuto** disputam a renovação do
+mesmo login do modelo, e o provedor pode revogar tudo (`refresh_token_reused`). Em produção,
+isso derrubou o agente. Espalhar os minutos desde o primeiro dia custa zero.
 
 > **Segure a mão dela em três rotinas.** Quem cria dez no primeiro dia recebe dez mensagens
 > irrelevantes e desliga tudo. Melhor três que ela lê de verdade.
@@ -112,7 +117,13 @@ hermes cron runs              # histórico de execuções — o que rodou e o qu
 hermes cron remove <nome>
 ```
 
-`hermes cron runs` é o primeiro lugar a olhar quando uma rotina "não chegou".
+`hermes cron runs` é o primeiro lugar a olhar quando uma rotina "não chegou". Mas atenção:
+**`succeeded` quer dizer que a rotina rodou, não que a mensagem chegou.** Na primeira execução
+de toda rotina nova, confira no Telegram. Já houve rotina "com sucesso" por semanas sem
+entregar nada.
+
+Quando o cérebro crescer, rotinas que decidem o que é pendente ficam muito melhores com busca.
+Ver [Módulo A1](../modulos/A1-busca-qmd.md).
 
 ---
 

@@ -81,6 +81,9 @@ journalctl --user -u hermes-gateway -f
 | `NoneType is not iterable` | Bug conhecido de SDK do provedor | Anote a versão, veja issues do Hermes; `hermes update` costuma resolver |
 | Responde vazio ou trava | Contexto estourado | `/new` no Telegram; se resolver, a memória está inchada (ver abaixo) |
 | Sem erro, sem resposta | Modelo não configurado | `hermes model` e confirme |
+| **Tudo verde e mudo**: serviço `active`, `auth status` diz *logged in*, sem erro recente | Token OAuth (assinatura) **venceu** e não renovou | *logged in* só confere se a entrada existe. Rode `hermes -z "responda OK"`; se falhar, renove/refaça o login do provedor. Ver [Módulo A3](../modulos/A3-operacao-blindada.md) |
+| `refresh_token_reused` | Rotinas de profiles diferentes renovaram o mesmo login no mesmo minuto | Refaça o login; depois **espalhe os minutos** das rotinas (Fase 7) |
+| Traceback aponta para uma linha que, no arquivo, é comentário | O processo roda código diferente do disco (update ou rollback com `start` em vez de `restart`) | `systemctl --user restart hermes-gateway.service` |
 
 Teste isolando o canal — se responder aqui, o problema é o Telegram, não o agente:
 ```bash
@@ -233,6 +236,24 @@ journalctl --user --vacuum-time=7d      # logs costumam ser o vilão
 
 Se a RAM vive no talo, é sinal de VPS pequena demais para o número de gateways. Ver Fase 1
 (plano) ou Fase 8 (menos sub-agentes).
+
+---
+
+## Busca no cérebro (qmd — Módulo A1)
+
+| Sintoma | Causa | Solução |
+|---|---|---|
+| Busca leva minutos | Rerank ligado numa VPS sem GPU | `--no-rerank` sempre; use o `brain-search` |
+| "No results" para algo que existe | `qmd query` com 0 ou 2+ `-c` (bug da 2.5.x) | Uma coleção por chamada (o `brain-search` já faz) |
+| Arquivo apagado continua aparecendo | Fantasma no índice depois de mudar coleção | Apague `~/.cache/qmd/index.sqlite*` e rode `qmd update && qmd embed` |
+| qmd instalado mas o agente nunca usa | MCP fica escondido atrás da busca de ferramentas | Cite `brain-search` no prompt das rotinas |
+
+## Pendências e classificador (Módulo A2)
+
+| Sintoma | Causa | Solução |
+|---|---|---|
+| Jev roda muito e **nunca** dá baixa | Pendências sem ID exato da origem (`message_id`) | Normal para o legado; grave o ID nas pendências novas |
+| Toda chamada volta `unavailable` | Fornecedor desligado, sem autorização, sem chave, 402/429 ou timeout | `jev-classify.py status`; é o comportamento seguro, não bug |
 
 ---
 
